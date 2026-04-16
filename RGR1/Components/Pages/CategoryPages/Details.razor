@@ -1,0 +1,46 @@
+﻿@page "/categories/details"
+@using Microsoft.EntityFrameworkCore
+@using RGR1.Data
+@inject IDbContextFactory<RGR1.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Просмотр</PageTitle>
+
+<h1>Просмотр</h1>
+
+<div>
+
+    <hr />
+    @if (category is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Название категории</dt>
+            <dd class="col-sm-10">@category.NameCategory</dd>
+        </dl>
+        <div>
+            <a href="@($"/categories/edit?categoryid={category.CategoryId}")">Редактировать</a> |
+            <a href="@($"/categories")">Вернуться назад</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Category? category;
+
+    [SupplyParameterFromQuery]
+    private int CategoryId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        category = await context.Categories.FirstOrDefaultAsync(m => m.CategoryId == CategoryId);
+
+        if (category is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

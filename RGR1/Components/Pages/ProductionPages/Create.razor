@@ -1,0 +1,69 @@
+﻿@page "/productions/create"
+@using Microsoft.EntityFrameworkCore
+@using RGR1.Data
+@inject IDbContextFactory<RGR1.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Создание товара</PageTitle>
+
+<h1>Создание товараы</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Production" OnValidSubmit="AddProduction" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="namepr" class="form-label">Наименование товара:</label> 
+                <InputText id="namepr" @bind-Value="Production.NamePr" class="form-control" /> 
+                <ValidationMessage For="() => Production.NamePr" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="description" class="form-label">Описание:</label> 
+                <InputText id="description" @bind-Value="Production.Description" class="form-control" /> 
+                <ValidationMessage For="() => Production.Description" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="price" class="form-label">Цена:</label> 
+                <InputNumber id="price" @bind-Value="Production.Price" class="form-control" /> 
+                <ValidationMessage For="() => Production.Price" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <input type="hidden" name="Production.CategoryId" @bind="Production.CategoryId" class="form-control" />
+                
+            </div>        
+            <button type="submit" class="btn btn-primary">Создать</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/productions?categoryid = @CategoryId">Вернуться назад</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public int? CategoryId { get; set; }
+    [SupplyParameterFromForm]
+    private Production Production { get; set; } = new();
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        if (CategoryId == null)
+        {
+            NavigationManager.NavigateTo("not found");
+        }
+        Production.CategoryId = CategoryId ?? 0;
+
+    }
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddProduction()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Productions.Add(Production);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/productions?categoryid" + CategoryId.ToString());
+    }
+}

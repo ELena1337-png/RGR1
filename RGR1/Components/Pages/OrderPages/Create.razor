@@ -1,0 +1,61 @@
+﻿@page "/orders/create"
+@using Microsoft.EntityFrameworkCore
+@using RGR1.Data
+@inject IDbContextFactory<RGR1.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Order</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Order" OnValidSubmit="AddOrder" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="productionid" class="form-label">ProductionId:</label> 
+                <InputNumber id="productionid" @bind-Value="Order.ProductionId" class="form-control" /> 
+                <ValidationMessage For="() => Order.ProductionId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="count" class="form-label">Count:</label> 
+                <InputNumber id="count" @bind-Value="Order.Count" class="form-control" /> 
+                <ValidationMessage For="() => Order.Count" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="dateorder" class="form-label">DateOrder:</label> 
+                <InputDate id="dateorder" @bind-Value="Order.DateOrder" class="form-control" /> 
+                <ValidationMessage For="() => Order.DateOrder" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="totalcost" class="form-label">TotalCost:</label> 
+                <InputNumber id="totalcost" @bind-Value="Order.TotalCost" class="form-control" /> 
+                <ValidationMessage For="() => Order.TotalCost" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/orders">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Order Order { get; set; } = default!;
+
+    protected override void OnInitialized() => Order ??= new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddOrder()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Orders.Add(Order);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/orders");
+    }
+}

@@ -1,0 +1,46 @@
+@page "/categories/create"
+@using Microsoft.EntityFrameworkCore
+@using RGR1.Data
+@inject IDbContextFactory<RGR1.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Создание</PageTitle>
+
+<h1>Создание</h1>
+
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Category" OnValidSubmit="AddCategory" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="namecategory" class="form-label">Название категории:</label> 
+                <InputText id="namecategory" @bind-Value="Category.NameCategory" class="form-control" /> 
+                <ValidationMessage For="() => Category.NameCategory" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Создать</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/categories">Вернуться назад</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Category Category { get; set; } = default!;
+
+    protected override void OnInitialized() =>Category ??= new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddCategory()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Categories.Add(Category);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/categories");
+    }
+}
