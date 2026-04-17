@@ -4,15 +4,15 @@
 @inject IDbContextFactory<RGR1.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Edit</PageTitle>
+<PageTitle>Редактирование</PageTitle>
 
-<h1>Edit</h1>
+<h1>Редактирование</h1>
 
-<h2>Production</h2>
+
 <hr />
 @if (Production is null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>Загрузка...</em></p>
 }
 else
 {
@@ -23,79 +23,80 @@ else
                 <ValidationSummary role="alert"/>
                 <input type="hidden" name="Production.ProductionId" value="@Production.ProductionId" />
                 <div class="mb-3">
-                    <label for="namepr" class="form-label">NamePr:</label>
+                    <label for="namepr" class="form-label">Наименование товара:</label>
                     <InputText id="namepr" @bind-Value="Production.NamePr" class="form-control" />
                     <ValidationMessage For="() => Production.NamePr" class="text-danger" />
                 </div>
                 <div class="mb-3">
-                    <label for="description" class="form-label">Description:</label>
+                    <label for="description" class="form-label">Описание:</label>
                     <InputText id="description" @bind-Value="Production.Description" class="form-control" />
                     <ValidationMessage For="() => Production.Description" class="text-danger" />
                 </div>
                 <div class="mb-3">
-                    <label for="price" class="form-label">Price:</label>
+                    <label for="price" class="form-label">Цена:</label>
                     <InputNumber id="price" @bind-Value="Production.Price" class="form-control" />
                     <ValidationMessage For="() => Production.Price" class="text-danger" />
                 </div>
                 <div class="mb-3">
-                    <label for="categoryid" class="form-label">CategoryId:</label>
-                    <InputNumber id="categoryid" @bind-Value="Production.CategoryId" class="form-control" />
-                    <ValidationMessage For="() => Production.CategoryId" class="text-danger" />
-                </div>
-                <button type="submit" class="btn btn-primary">Save</button>
+                <input type="hidden" name="CategoryId" value="@CategoryId" /> @* добавить эту строку *@
+                </div>  
+                <button type="submit" class="btn btn-primary">Сохранить</button>
             </EditForm>
         </div>
     </div>
 }
 
 <div>
-    <a href="/productions">Back to List</a>
+    <a href="/productions?categoryid=@CategoryId">Вернуться назад</a>
 </div>
 
 @code {
     [SupplyParameterFromQuery]
     private int ProductionId { get; set; }
+    [SupplyParameterFromQuery]
+    public int? CategoryId { get; set; }
+
+    [SupplyParameterFromForm]
+    public int? CategoryIdForm { get; set; }
 
     [SupplyParameterFromForm]
     private Production? Production { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        using var context = DbFactory.CreateDbContext();
-        Production ??= await context.Productions.FirstOrDefaultAsync(m => m.ProductionId == ProductionId);
+protected override async Task OnInitializedAsync()
+{
+    // CategoryId из query при GET, CategoryIdForm из формы при POST
+    CategoryId ??= CategoryIdForm;
+    
+    using var context = DbFactory.CreateDbContext();
+    Production ??= await context.Productions.FirstOrDefaultAsync(m => m.ProductionId == ProductionId);
 
-        if (Production is null)
-        {
-            NavigationManager.NavigateTo("notfound");
-        }
+    if (Production is null)
+    {
+        NavigationManager.NavigateTo("notfound");
     }
+}
 
     // To protect from overposting attacks, enable the specific properties you want to bind to.
     // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
-    private async Task UpdateProduction()
+private async Task UpdateProduction()
+{
+    using var context = DbFactory.CreateDbContext();
+
+    var existing = await context.Productions.FindAsync(Production!.ProductionId);
+    if (existing is null)
     {
-        using var context = DbFactory.CreateDbContext();
-        context.Attach(Production!).State = EntityState.Modified;
-
-        try
-        {
-            await context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!ProductionExists(Production!.ProductionId))
-            {
-                NavigationManager.NavigateTo("notfound");
-            }
-            else
-            {
-                throw;
-            }
-        }
-
-        NavigationManager.NavigateTo("/productions");
+        NavigationManager.NavigateTo("notfound");
+        return;
     }
 
+    existing.NamePr = Production.NamePr;
+    existing.Description = Production.Description;
+    existing.Price = Production.Price;
+    // CategoryId не трогаем — берём из существующей записи
+
+    await context.SaveChangesAsync();
+    NavigationManager.NavigateTo($"/productions?categoryid={CategoryId}");
+}
     private bool ProductionExists(int productionid)
     {
         using var context = DbFactory.CreateDbContext();

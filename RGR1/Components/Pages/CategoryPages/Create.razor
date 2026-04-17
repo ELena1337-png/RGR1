@@ -17,7 +17,8 @@
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="mb-3">
                 <label for="namecategory" class="form-label">Название категории:</label> 
-                <InputText id="namecategory" @bind-Value="Category.NameCategory" class="form-control" /> 
+                <InputText id="namecategory" @bind-Value="Category.NameCategory" 
+           class="form-control" name="Category.NameCategory" />
                 <ValidationMessage For="() => Category.NameCategory" class="text-danger" /> 
             </div>        
             <button type="submit" class="btn btn-primary">Создать</button>
@@ -30,7 +31,7 @@
 </div>
 
 @code {
-    [SupplyParameterFromForm]
+    [SupplyParameterFromForm(FormName = "create")]
     private Category Category { get; set; } = default!;
 
     protected override void OnInitialized() =>Category ??= new();

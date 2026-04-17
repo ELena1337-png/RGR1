@@ -6,7 +6,7 @@
 
 <PageTitle>Создание товара</PageTitle>
 
-<h1>Создание товараы</h1>
+<h1>Создание товара</h1>
 
 <hr />
 <div class="row">
@@ -31,7 +31,6 @@
             </div>        
             <div class="mb-3">
                 <input type="hidden" name="Production.CategoryId" @bind="Production.CategoryId" class="form-control" />
-                
             </div>        
             <button type="submit" class="btn btn-primary">Создать</button>
         </EditForm>
@@ -39,11 +38,12 @@
 </div>
 
 <div>
-    <a href="/productions?categoryid = @CategoryId">Вернуться назад</a>
+    <a href="/productions?categoryid=@CategoryId">Вернуться назад</a>
 </div>
 
 @code {
     [SupplyParameterFromQuery]
+
     public int? CategoryId { get; set; }
     [SupplyParameterFromForm]
     private Production Production { get; set; } = new();
@@ -64,6 +64,6 @@
         using var context = DbFactory.CreateDbContext();
         context.Productions.Add(Production);
         await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/productions?categoryid" + CategoryId.ToString());
+        NavigationManager.NavigateTo($"/productions?categoryid={CategoryId}");
     }
 }
