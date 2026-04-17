@@ -17,7 +17,7 @@
     <a href="categories">Возврат к списку категорий</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Productions">
+<QuickGrid Class="table" Items="productionsQuery">
     <PropertyColumn Title = "Наименование товаров" Property="production => production.NamePr" />
     <PropertyColumn Title = "Описание" Property="production => production.Description" />
     <PropertyColumn Title = "Цена" Property="production => production.Price" />
@@ -26,9 +26,9 @@
 
     <TemplateColumn Context="production">
         <a href="@($"orders?productionid={production.ProductionId}")">Заказы</a> |
-        <a href="@($"productions/edit?productionid={production.ProductionId}")">Редактировать</a> |
-        <a href="@($"productions/details?productionid={production.ProductionId}")">Просмотр</a> |
-        <a href="@($"productions/delete?productionid={production.ProductionId}")">Удалить</a>
+       <a href="@($"productions/edit?productionid={production.ProductionId}&categoryid={CategoryId}")">Редактировать</a>|
+        <a href="@($"productions/details?productionid={production.ProductionId}&categoryid={CategoryId}")">Просмотр</a> |
+        <a href="@($"productions/delete?productionid={production.ProductionId}&categoryid={CategoryId}")">Удалить</a>
     </TemplateColumn>
 </QuickGrid>
 
@@ -37,20 +37,31 @@
     public int? CategoryId { get; set; }
     public string? NameCategory { get; set; }
     private ApplicationDbContext context = default!;
+    private IQueryable<Production> productionsQuery = default!;
 
     protected override void OnInitialized()
     {
         context = DbFactory.CreateDbContext();
+
         if (CategoryId == null)
         {
-            NavigationManager.NavigateTo("not found");
+            NavigationManager.NavigateTo("/categories");
+            return;
         }
+
         var category = context.Categories.FirstOrDefault(d => d.CategoryId == CategoryId);
-        if (CategoryId == null)
+
+        if (category == null)
         {
-            NavigationManager.NavigateTo("not found");
+            NavigationManager.NavigateTo("/categories");
+            return;
         }
-        NameCategory = category!.NameCategory;
+
+        NameCategory = category.NameCategory;
+
+        productionsQuery = context.Productions
+            .Include(p => p.Orders)
+            .Where(p => p.CategoryId == CategoryId);
     }
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();

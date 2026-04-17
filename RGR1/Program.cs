@@ -28,7 +28,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // options.UseSqlServer(connectionString));
 //builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDbContextFactory<ApplicationDbContext>(options => options.UseSqlServer(connectionString).UseLazyLoadingProxies());
+// Program.cs
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options => 
+    options.UseSqlServer(connectionString)); 
 
 builder.Services.AddQuickGridEntityFrameworkAdapter();
 
@@ -42,6 +44,8 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
