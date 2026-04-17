@@ -4,31 +4,30 @@
 @inject IDbContextFactory<RGR1.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Details</PageTitle>
+<PageTitle>Просмотр</PageTitle>
 
-<h1>Details</h1>
+<h1>Просмотр</h1>
 
 <div>
-    <h2>Production</h2>
     <hr />
     @if (production is null)
     {
-        <p><em>Loading...</em></p>
+        <p><em>Загрузка...</em></p>
     }
     else {
         <dl class="row">
-            <dt class="col-sm-2">NamePr</dt>
+            <dt class="col-sm-2">Наименование товара</dt>
             <dd class="col-sm-10">@production.NamePr</dd>
-            <dt class="col-sm-2">Description</dt>
+            <dt class="col-sm-2">Описание</dt>
             <dd class="col-sm-10">@production.Description</dd>
-            <dt class="col-sm-2">Price</dt>
+            <dt class="col-sm-2">Цена</dt>
             <dd class="col-sm-10">@production.Price</dd>
-            <dt class="col-sm-2">CategoryId</dt>
-            <dd class="col-sm-10">@production.CategoryId</dd>
+            @* <dt class="col-sm-2">CategoryId</dt>
+            <dd class="col-sm-10">@production.CategoryId</dd> *@
         </dl>
         <div>
-            <a href="@($"/productions/edit?productionid={production.ProductionId}")">Edit</a> |
-            <a href="@($"/productions")">Back to List</a>
+            <a href="@($"productions/edit?productionid={production.ProductionId}&categoryid={CategoryId}")">Редактировать</a> |
+            <a href="/productions?categoryid=@CategoryId">Вернуться назад</a>
         </div>
     }
 </div>
@@ -36,6 +35,9 @@
 @code {
     private Production? production;
 
+    [SupplyParameterFromQuery]
+    public int? CategoryId { get; set; }
+    
     [SupplyParameterFromQuery]
     private int ProductionId { get; set; }
 

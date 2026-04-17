@@ -13,7 +13,7 @@
     <a href="categories/create">Добавить новую категорию</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Categories">
+<QuickGrid Class="table" Items="categoriesQuery">
     <PropertyColumn Title = "Название категории" Property  ="category => category.NameCategory" />
     <PropertyColumn Title="Колличество товаров" Property="category => category.Productions!.Count()" />
 
@@ -27,11 +27,17 @@
 
 @code {
     private ApplicationDbContext context = default!;
+    private IQueryable<Category> categoriesQuery = default!;
 
     protected override void OnInitialized()
     {
         context = DbFactory.CreateDbContext();
+        categoriesQuery = context.Categories.Include(c => c.Productions);
     }
 
-    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+    public async ValueTask DisposeAsync()
+    {
+        await context.DisposeAsync();
+    }
 }
+
